@@ -10,7 +10,7 @@
 
 import { basename } from 'path'
 import vscode = require('vscode')
-import moment = require('moment')
+import dayjs from 'dayjs'
 
 import {
   ExtensionContext, TextEdit, TextEditorEdit, TextDocument, Position, Range
@@ -20,7 +20,7 @@ import {
   extractHeader, getHeaderInfo, renderHeader,
   supportsLanguage, HeaderInfo
 } from './header'
-import { isNullOrUndefined, puts } from 'util'
+import { isNullOrUndefined } from 'util'
 
 let headerStatus: vscode.StatusBarItem;
 let headerInsertStatus: vscode.StatusBarItem;
@@ -41,7 +41,7 @@ const getCurrentUser = () =>
  */
 const getCurrentUserMail = () =>
   vscode.workspace.getConfiguration()
-    .get('42header.email') || renderUserMail(getCurrentUser())
+    .get('42header.email') || renderUserMail(getCurrentUser() as string)
 
 const renderUserMail = (user: string) => `${user}@student.42.fr`
 
@@ -63,7 +63,7 @@ const newHeaderInfo = (document: TextDocument, headerInfo?: HeaderInfo) => {
   return Object.assign({},
     // This will be overwritten if headerInfo is not null
     {
-      createdAt: moment(),
+      createdAt: dayjs(),
       createdBy: user
     },
     headerInfo,
@@ -71,7 +71,7 @@ const newHeaderInfo = (document: TextDocument, headerInfo?: HeaderInfo) => {
       filename: basename(document.fileName),
       author: `${user} <${mail}>`,
       updatedBy: getCurrentUser(),
-      updatedAt: moment()
+      updatedAt: dayjs()
     }
   )
 }
@@ -81,6 +81,8 @@ const newHeaderInfo = (document: TextDocument, headerInfo?: HeaderInfo) => {
  */
 const insertHeaderHandler = () => {
   const { activeTextEditor } = vscode.window
+  if (!activeTextEditor)
+    return;
   const { document } = activeTextEditor
   headerInsertStatus.hide();
   if (supportsLanguage(document.languageId))

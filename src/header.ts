@@ -8,16 +8,16 @@
      ## ## ## :##
       ## ## ##*/
 
-import moment = require('moment')
+import dayjs from 'dayjs'
 import { languageDemiliters } from './delimiters'
 
 export type HeaderInfo = {
   filename: string,
   author: string,
   createdBy: string,
-  createdAt: moment.Moment,
+  createdAt: dayjs.Dayjs,
   updatedBy: string,
-  updatedAt: moment.Moment
+  updatedAt: dayjs.Dayjs
 }
 
 /**
@@ -41,7 +41,7 @@ const genericTemplate = `
  * Get specific header template for languageId
  */
 const getTemplate = (languageId: string) => {
-  const [left, right] = languageDemiliters[languageId]
+  const [left, right] = languageDemiliters[languageId] || []
   const width = left.length
 
   // Replace all delimiters with ones for current language
@@ -59,14 +59,14 @@ const pad = (value: string, width: number) =>
 /**
  * Stringify Date to correct format for header
  */
-const formatDate = (date: moment.Moment) =>
+const formatDate = (date: dayjs.Dayjs) =>
   date.format('YYYY/MM/DD HH:mm:ss')
 
 /**
  * Get Date object from date string formatted for header
  */
 const parseDate = (date: string) =>
-  moment(date, 'YYYY/MM/DD HH:mm:ss')
+  dayjs(date, 'YYYY/MM/DD HH:mm:ss')
 
 /**
  * Check if language is supported
@@ -95,7 +95,7 @@ const fieldRegex = (name: string) =>
  * Get value for given field name from header string
  */
 const getFieldValue = (header: string, name: string) => {
-  const [_, offset, field] = genericTemplate.match(fieldRegex(name))
+  const [_, offset, field] = genericTemplate.match(fieldRegex(name)) || []
 
   return header.substr(offset.length, field.length)
 }
@@ -104,7 +104,7 @@ const getFieldValue = (header: string, name: string) => {
  * Set field value in header string
  */
 const setFieldValue = (header: string, name: string, value: string) => {
-  const [_, offset, field] = genericTemplate.match(fieldRegex(name))
+  const [_, offset, field] = genericTemplate.match(fieldRegex(name)) || []
 
   return header.substr(0, offset.length)
     .concat(pad(value, field.length))
